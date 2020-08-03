@@ -1,0 +1,17 @@
+Resources:
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-09d95fab7fff3776c
+      KeyName: newkey2     
+      SubnetId: subnet-0204bba7811fe880a
+      DisableApiTermination: false
+      EbsOptimized: false      
+      SecurityGroupIds: 
+      - sg-0e1a2d339ffb1395b
+      Tags:
+      - Key: Name
+        Value: EC2
+      - Key: Environment
+        Value: TEST
