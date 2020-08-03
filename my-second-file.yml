@@ -1,0 +1,14 @@
+Resources:
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value: IGW
+      - Key: Network
+        Value: Public
+  GatewaytoInternet:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties: 
+      VpcId: vpc-02f0fcac165f8502a
+      InternetGatewayId: !Ref InternetGateway
