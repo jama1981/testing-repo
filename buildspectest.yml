@@ -1,0 +1,22 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.7
+  pre-build:
+    commands:
+      - aws cloudformation validate-template --template-body file://function.yml
+      - pip install cfn-lint
+      - cfn-lint function.yml
+  post_build:
+    commands:
+      - aws cloudformation package
+        --template-file function.yml
+        --s3-bucket ${S3_BUCKET}
+        --output-template-file function.yml
+        
+artifacts:
+  type: zip
+  files:
+    - function.yml
