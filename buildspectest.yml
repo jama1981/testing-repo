@@ -4,7 +4,7 @@ phases:
   install:
     runtime-versions:
       python: 3.7
-  pre-build:
+  pre_build:
     commands:
       - aws cloudformation validate-template --template-body file://function.yml
       - pip install cfn-lint
