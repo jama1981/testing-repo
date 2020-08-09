@@ -1,0 +1,101 @@
+Parameters:
+  BuildSpecPath:
+    Default: buildspec.yml
+    Type: String
+  GitHubBranch:
+    Default: master
+    Type: String
+  GitHubOwner:
+    Type: String
+    Default: jama1981
+  GitHubRepo:
+    Type: String
+    Default: testing-repo
+  GitHubToken:
+    Type: String
+    Default: 71700980d609a61e6dcd7da87299bed93bd38bde
+Resources:
+  SampleBuildProject:
+    Properties:
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        EnvironmentVariables:
+          - Name: S3_BUCKET
+            Value: !ImportValue 'devops-bucket-name'
+        Image: aws/codebuild/amazonlinux2-x86_64-standard:1.0
+        Type: LINUX_CONTAINER
+      Name: devops-codepipeline-project
+      ServiceRole: !ImportValue 'devops-codebuild-service-role-arn'
+      Source:
+        BuildSpec: !Ref 'BuildSpecPath'
+        Type: CODEPIPELINE
+    Type: AWS::CodeBuild::Project
+  SamplePipeline:
+    Properties:
+      ArtifactStore:
+        Location: !ImportValue 'devops-bucket-name'
+        Type: S3
+      RoleArn: !ImportValue 'devops-codepipeline-service-role-arn'
+      Stages:
+        - Actions:
+            - ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Provider: GitHub
+                Version: '1'
+              Configuration:
+                Branch: !Ref 'GitHubBranch'
+                OAuthToken: !Ref 'GitHubToken'
+                Owner: !Ref 'GitHubOwner'
+                Repo: !Ref 'GitHubRepo'
+              Name: App
+              OutputArtifacts:
+                - Name: MyApp
+          Name: Source
+        - Actions:
+            - ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                ProjectName: !Ref 'SampleBuildProject'
+              InputArtifacts:
+                - Name: MyApp
+              Name: Build
+              OutputArtifacts:
+                - Name: MyBuild
+              RunOrder: 1
+          Name: Build
+        - Actions:
+            - ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              Configuration:
+                ActionMode: CHANGE_SET_REPLACE
+                Capabilities: CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND
+                ChangeSetName: pipeline-devops-function-change-set
+                RoleArn: !ImportValue 'devops-cloudformation-service-role-arn'
+                StackName: pipeline-devops-function
+                TemplatePath: MyBuild::function.yml
+              InputArtifacts:
+                - Name: MyBuild
+              Name: ChangeSetReplace
+              RunOrder: 1
+            - ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              Configuration:
+                ActionMode: CHANGE_SET_EXECUTE
+                ChangeSetName: pipeline-devops-function-change-set
+                StackName: pipeline-devops-function
+              Name: ChangeSetExecute
+              RunOrder: 2
+          Name: Deploy
+    Type: AWS::CodePipeline::Pipeline
