@@ -13,7 +13,7 @@ Parameters:
     Default: testing-repo
   GitHubToken:
     Type: String
-    Default: 7a7733729745d1e56c572f1ed1d3ba201de834b6 
+    Default: 795009b2198bd3ad7c78da9ae50be16a96e763d2 
 
 Resources:
   SampleBuildProject:
