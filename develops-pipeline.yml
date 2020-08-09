@@ -1,6 +1,6 @@
 Parameters:
   BuildSpecPath:
-    Default: buildspec.yml
+    Default: buildspectest.yml
     Type: String
   GitHubBranch:
     Default: master
@@ -13,7 +13,7 @@ Parameters:
     Default: testing-repo
   GitHubToken:
     Type: String
-    Default: f3eb3a789d9ae3e939f3500800e267516837afc5 
+    Default: 7a7733729745d1e56c572f1ed1d3ba201de834b6 
 
 Resources:
   SampleBuildProject:
